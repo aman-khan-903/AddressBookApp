@@ -1,42 +1,61 @@
 package com.example.addressBookApp.sevice;
 
 
+import com.example.addressBookApp.DTO.AddressDTO;
+import com.example.addressBookApp.model.Address;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class AddressBookService {
-    private final List<String> addressBook = new ArrayList<>();
+    private final List<Address> addressBook = new ArrayList<>();
+    private long idCounter = 1;
 
-    public String addAddress(String name){
-        addressBook.add(name);
-        return "Address added :" + name;
+    public String addAddress(AddressDTO addressDTO) {
+        Address address = new Address(idCounter++, addressDTO.getName(), addressDTO.getPhone(), addressDTO.getEmail());
+        addressBook.add(address);
+        return "Stored Address: " + address.toString();
     }
     public String getAllAddress(){
-        return "All Addresses" + addressBook.toString();
-    }
-    public String getAddressById(int id) {
-        if (id >= 0 && id < addressBook.size()) {
-            return "Address at ID " + id + ": " + addressBook.get(id);
-        } else {
-            return "Address not found for ID: " + id;
+        if (addressBook.isEmpty()) {
+            return "No addresses found";
         }
+        StringBuilder response = new StringBuilder("All Addresses:\n");
+        for (Address address : addressBook) {
+            response.append(address).append("\n");
+        }
+        return response.toString();
+    }
+    public String getAddressById(long id) {
+        for (Address address : addressBook) {
+            if (address.getId() == id) {
+                return "Found Address: " + address;
+            }
+        }
+        return "Address not found for ID: " + id;
     }
 
-    public String updateAddress(int id, String newName) {
-        if (id >= 0 && id < addressBook.size()) {
-            addressBook.set(id, newName);
-            return "Updated address at ID " + id + " to: " + newName;
-        } else {
-            return "Address not found for update at ID: " + id;
+    public String updateAddress(long id, AddressDTO addressDTO) {
+        for (Address address : addressBook) {
+            if (address.getId() == id) {
+                address.setName(addressDTO.getName());
+                address.setPhone(addressDTO.getPhone());
+                address.setEmail(addressDTO.getEmail());
+                return "Updated Address: " + address;
+            }
         }
+        return "Address not found for update at ID: " + id;
     }
 
-    public String deleteAddress(int id) {
-        if (id >= 0 && id < addressBook.size()) {
-            String removed = addressBook.remove(id);
-            return "Deleted address: " + removed;
-        } else {
-            return "Address not found for deletion at ID: " + id;
+    public String deleteAddress(long id) {
+        for (Address address : addressBook) {
+            if (address.getId() == id) {
+                addressBook.remove(address);
+                return "Deleted Address: " + address;
+            }
         }
+        return "Address not found for deletion at ID: " + id;
     }
 }
